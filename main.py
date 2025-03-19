@@ -18,6 +18,9 @@ if "chat_history" not in st.session_state:
 # Global variable for speech thread
 speech_thread = None
 
+# API Configuration
+OPENROUTER_API_KEY = "Bearer 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"
+
 # Helper functions
 def listen_audio():
     recognizer = sr.Recognizer()
@@ -39,20 +42,31 @@ def transcribe_audio(audio):
 def get_response_from_openrouter(prompt):
     url = "https://openrouter.ai/api/v1/chat/completions"
     headers = {
-        "Authorization": "Bearer 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",
+        "Authorization": OPENROUTER_API_KEY,
+        "HTTP-Referer": "https://localhost:8501",  # Replace with your actual domain
+        "X-Title": "Fardeen's J.A.R.V.I.S.",
         "Content-Type": "application/json"
     }
     data = {
-        "model": "google/gemini-2.0-flash-lite-preview-02-05:free",
-        "messages": [{"role": "user", "content": prompt}]
+        "model": "meta-llama/llama-3.3-70b-instruct:free",  # Updated to use GPT-4 model
+        "messages": [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
     }
+    
     try:
         response = requests.post(url, headers=headers, json=data, timeout=10)
+        if response.status_code == 401:
+            st.error("Invalid API key. Please check your OpenRouter API key.")
+            return None
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
     except requests.exceptions.RequestException as e:
-        st.error(f"API request failed: {e}")
-    return None
+        st.error(f"API request failed: {str(e)}")
+        return None
 
 def speak_text(text):
     global speech_thread
@@ -102,7 +116,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Main layout
-st.title("🎙️ Voice Assistant")
+st.title("🎙️ Fardeen's J.A.R.V.I.S.")
 st.markdown("Experience seamless voice interaction with our AI-powered assistant")
 
 # Chat history container
