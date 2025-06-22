@@ -19,7 +19,7 @@ if "chat_history" not in st.session_state:
 speech_thread = None
 
 # API Configuration
-OPENROUTER_API_KEY = "Bearer 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"
+OPENROUTER_API_KEY = "Bearer "
 
 # Helper functions
 def listen_audio():
